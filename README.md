@@ -8,18 +8,20 @@ A real-time, anonymous chat application featuring private messaging, random matc
 - **Real-time Messaging**: Instant delivery with Socket.IO.
 - **Random Matching**: Connect with strangers instantly.
 - **Private Chats**: Request to chat with specific users from the online list.
-- **Public Rooms**: Join themed rooms like Tech, Anime, Music, etc.
-- **Responsive Design**: Mobile-first UI with smooth transitions.
+- **Responsive Design**: Mobile-first UI with smooth transitions and glassmorphism effects.
+- **Secure**: Identity management via JWT/Tokens (simulated in this demo via UUID) and HttpOnly cookies (concept).
 
 ---
 
 ## 🚀 Setup Guide (Local Development)
 
 ### Prerequisites
+
 - **Node.js** (v18 or higher)
-- **npm**
+- **npm** or **yarn**
 
 ### 1. Backend Setup
+
 The backend handles WebSocket connections and user sessions.
 
 1.  Navigate to the server directory:
@@ -37,6 +39,7 @@ The backend handles WebSocket connections and user sessions.
     *The server will run on `http://localhost:3001`*
 
 ### 2. Frontend Setup
+
 The frontend is a Vite + React application.
 
 1.  Open a new terminal and navigate to the root directory (where `package.json` for the frontend is located).
@@ -54,41 +57,72 @@ The frontend is a Vite + React application.
 
 ## ☁️ Deployment Guide
 
-This application is split into two parts: the **Backend** (Node.js) and the **Frontend** (React). You must deploy them separately.
+### 1. Deploying the Backend (Node.js)
 
-### Step 1: Deploy Backend to Render
+You can deploy the backend to services like **Render**, **Railway**, or **Heroku**.
+
+**Example: Deploying to Render**
 
 1.  Push your code to a GitHub repository.
-2.  Log in to [Render](https://render.com).
-3.  Click **New +** -> **Web Service**.
-4.  Connect your GitHub repository.
-5.  Fill in the following details:
-    *   **Name**: `anonchat-backend` (or similar)
-    *   **Root Directory**: `server` (Important! The backend code is in this subfolder).
-    *   **Environment**: `Node`
-    *   **Build Command**: `npm install`
-    *   **Start Command**: `node index.js`
-6.  Click **Create Web Service**.
-7.  Wait for deployment to finish. **Copy the backend URL** (e.g., `https://anonchat-backend.onrender.com`).
+2.  Create a new **Web Service** on Render.
+3.  Connect your repository.
+4.  Set the **Root Directory** to `server`.
+5.  Set the **Build Command** to `npm install`.
+6.  Set the **Start Command** to `node index.js`.
+7.  Deploy.
+8.  **Copy the URL** provided by Render (e.g., `https://anonchat-backend.onrender.com`).
 
-### Step 2: Deploy Frontend to Netlify
+### 2. Deploying the Frontend (React/Vite)
 
-1.  Log in to [Netlify](https://netlify.com).
-2.  Click **Add new site** -> **Import from existing project**.
-3.  Connect your GitHub repository.
-4.  Fill in the build settings:
-    *   **Base directory**: (Leave empty or `/`)
-    *   **Build command**: `npm run build`
-    *   **Publish directory**: `dist`
-5.  **Environment Variables**:
-    You need to tell the frontend where to find your Render backend.
-    *   Click **Add environment variable**.
-    *   Key: `VITE_API_URL`
-    *   Value: Your Render Backend URL (e.g., `https://anonchat-backend.onrender.com`) - *Do not add a trailing slash / at the end*.
-6.  Click **Deploy**.
+You can deploy the frontend to **Vercel** or **Netlify**.
 
-### Step 3: Troubleshooting
+**Example: Deploying to Vercel**
 
-*   **Connection Error?**: Ensure your `VITE_API_URL` in Netlify does **not** have a trailing slash.
-*   **Redirects**: A `_redirects` file has been added to the `public` folder to ensure the app works if you refresh the page on Netlify.
-*   **CORS**: The server is currently configured to allow all origins (`origin: "*"`). This is fine for initial deployment.
+1.  Push your code to GitHub.
+2.  Import the project into Vercel.
+3.  Set the **Root Directory** to `./` (default).
+4.  **Environment Variables**:
+    You must tell the frontend where your backend lives. Add the following environment variable in the Vercel dashboard:
+    
+    *   **Name**: `VITE_API_URL`
+    *   **Value**: Your Backend URL (e.g., `https://anonchat-backend.onrender.com`) - *Do not add a trailing slash*
+
+5.  Deploy.
+
+### 3. Final Configuration
+
+Ensure your Backend allows CORS from your new Frontend URL.
+
+In `server/index.js`, update the CORS configuration if necessary (currently set to `*` for ease of setup):
+
+```javascript
+const io = new Server(server, {
+  cors: {
+    origin: ["https://your-frontend-app.vercel.app", "http://localhost:5173"],
+    methods: ["GET", "POST"]
+  }
+});
+```
+
+---
+
+## 📁 Project Structure
+
+```
+├── components/          # React Components
+│   ├── ui/              # Reusable UI elements (Button, etc.)
+│   ├── ChatWindow.tsx   # Main chat interface
+│   ├── Sidebar.tsx      # User list and navigation
+│   ├── LoginModal.tsx   # Auth screen
+│   └── LandingPage.tsx  # Marketing landing page
+├── contexts/            # React Contexts
+│   └── AuthContext.tsx  # Authentication logic
+├── services/            # Services
+│   └── socket.ts        # Socket.IO client wrapper
+├── server/              # Backend Code
+│   ├── index.js         # Main server file
+│   └── package.json     # Backend dependencies
+├── App.tsx              # Main Application Component
+├── types.ts             # TypeScript interfaces
+└── index.html           # Entry HTML
+```
